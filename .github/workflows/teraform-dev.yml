@@ -13,6 +13,7 @@ permissions:
 env:
   AWS_REGION: "ap-south-1"
   ROLE_ARN: "arn:aws:iam::440185825337:role/terraform-deployer-role"
+  TF_DIR: "terraform/infra-dev"
 
 jobs:
   plan:
@@ -34,10 +35,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=${{ env.TF_DIR }} init
 
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform -chdir=${{ env.TF_DIR }} plan -input=false
 
   apply:
     name: Terraform DEV Apply
@@ -60,7 +61,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=${{ env.TF_DIR }} init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform -chdir=${{ env.TF_DIR }} apply -auto-approve
