@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
+      - main
 
 permissions:
   id-token: write
@@ -13,11 +13,12 @@ permissions:
 env:
   AWS_REGION: "ap-south-1"
   ROLE_ARN: "arn:aws:iam::440185825337:role/terraform-deployer-role"
+  TF_DIR: "terraform/infra-prod"
 
 jobs:
   plan:
-    name: Terraform DEV Plan
-    environment: dev-plan
+    name: Terraform PROD Plan
+    environment: prod-plan
     runs-on: ubuntu-latest
 
     steps:
@@ -34,17 +35,17 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=${{ env.TF_DIR }} init
 
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform -chdir=${{ env.TF_DIR }} plan -input=false
 
   apply:
-    name: Terraform DEV Apply
-    environment: dev-apply
+    name: Terraform PROD Apply
+    environment: prod-apply
     runs-on: ubuntu-latest
     needs: plan
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout repository
@@ -60,7 +61,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform -chdir=${{ env.TF_DIR }} init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform -chdir=${{ env.TF_DIR }} apply -auto-approve
